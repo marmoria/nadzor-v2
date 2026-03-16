@@ -2,18 +2,51 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Brick Buro · Авторский надзор</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1C1C1C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="АС Надзор">
+<link rel="apple-touch-icon" href="icon.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root { --dark:#1C1C1C; --brick:#B85C3A; --brick-light:#F5EDE8; --warm:#F7F4F0; --rule:#D4C8BD; --muted:#888076; --mid:#3A3A3A; }
 body { font-family:-apple-system,Arial,sans-serif; background:var(--warm); min-height:100vh; }
 .app { max-width:680px; margin:0 auto; display:flex; flex-direction:column; min-height:100vh; }
+
+/* AUTH */
+.auth-wrap { flex:1; display:flex; align-items:center; justify-content:center; padding:20px; }
+.auth-card { background:white; border:0.5px solid var(--rule); padding:32px; width:100%; max-width:380px; }
+.auth-logo { display:flex; align-items:center; gap:10px; margin-bottom:28px; }
+.auth-logo-icon { width:32px; height:32px; background:var(--dark); display:flex; align-items:center; justify-content:center; }
+.auth-logo-text { font-size:13px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--dark); }
+.auth-logo-sub { font-size:10px; color:var(--muted); margin-top:1px; }
+.auth-title { font-size:18px; font-weight:600; color:var(--dark); margin-bottom:6px; }
+.auth-sub { font-size:13px; color:var(--muted); margin-bottom:24px; line-height:1.5; }
+.auth-field { display:flex; flex-direction:column; gap:5px; margin-bottom:14px; }
+.auth-label { font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); }
+.auth-input { border:0.5px solid var(--rule); padding:11px 13px; font-size:14px; color:var(--dark); outline:none; width:100%; font-family:inherit; }
+.auth-input:focus { border-color:var(--brick); }
+.auth-btn { background:var(--brick); color:white; border:none; padding:12px; font-size:14px; font-weight:600; width:100%; cursor:pointer; font-family:inherit; margin-top:6px; }
+.auth-btn:hover { background:#9a4a2c; }
+.auth-btn:disabled { opacity:0.6; }
+.auth-switch { text-align:center; margin-top:16px; font-size:13px; color:var(--muted); }
+.auth-switch a { color:var(--brick); cursor:pointer; text-decoration:none; }
+.auth-err { background:#FFF0EB; border-left:3px solid var(--brick); padding:10px 12px; font-size:12px; color:#B85C3A; margin-bottom:14px; line-height:1.5; display:none; }
+.auth-err.show { display:block; }
+
+/* HEADER */
 .hdr { background:var(--dark); padding:12px 16px; display:flex; align-items:center; gap:10px; }
 .hdr-icon { width:22px; height:22px; background:var(--brick); display:flex; align-items:center; justify-content:center; }
 .hdr-word { font-size:11px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:white; }
-.hdr-right { font-size:11px; color:rgba(255,255,255,0.4); letter-spacing:0.06em; text-transform:uppercase; margin-left:auto; }
+.hdr-right { font-size:11px; color:rgba(255,255,255,0.4); margin-left:auto; display:flex; align-items:center; gap:12px; }
+.logout-btn { background:none; border:none; color:rgba(255,255,255,0.45); font-size:11px; cursor:pointer; font-family:inherit; }
+.logout-btn:hover { color:white; }
+
+/* VISITS */
 .pg { flex:1; padding:16px; }
 .top-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
 .h1 { font-size:20px; font-weight:600; color:var(--dark); }
@@ -25,6 +58,8 @@ body { font-family:-apple-system,Arial,sans-serif; background:var(--warm); min-h
 .varr { position:absolute; right:14px; top:50%; transform:translateY(-50%); color:var(--muted); }
 .empty { text-align:center; padding:40px 20px; color:var(--muted); font-size:13px; }
 .loading { text-align:center; padding:40px 20px; color:var(--muted); font-size:13px; }
+
+/* VISIT */
 .vpage { flex:1; display:flex; flex-direction:column; }
 .vhdr { background:var(--dark); padding:12px 16px; display:flex; align-items:center; gap:10px; }
 .backb { color:rgba(255,255,255,0.6); font-size:12px; cursor:pointer; background:none; border:none; font-family:inherit; white-space:nowrap; }
@@ -72,12 +107,8 @@ body { font-family:-apple-system,Arial,sans-serif; background:var(--warm); min-h
 .bbtn { background:var(--brick); color:white; border:none; padding:11px; font-size:13px; font-weight:600; width:100%; cursor:pointer; margin-bottom:10px; font-family:inherit; }
 .bbtn:hover { background:#9a4a2c; }
 .hint { background:var(--brick-light); border-left:3px solid var(--brick); padding:10px 12px; font-size:12px; color:var(--mid); line-height:1.6; margin-bottom:10px; }
-.sync-status { font-size:11px; color:var(--muted); padding:4px 0; text-align:center; }
-.sync-status.ok { color:#5A8A6A; }
-.sync-status.err { color:#B85C3A; }
-.uploading { opacity:0.6; pointer-events:none; }
 
-/* PDF styles */
+/* PDF */
 @media print {
   body { background:white !important; }
   .no-print { display:none !important; }
@@ -137,15 +168,10 @@ body { font-family:-apple-system,Arial,sans-serif; background:var(--warm); min-h
 </style>
 </head>
 <body>
-<div class="app" id="app"></div>
-
+<div class="app" id="app"><div class="loading" style="padding:40px;text-align:center">Загрузка...</div></div>
 <script>
-// ============ SUPABASE CONFIG ============
-// Замените на свои ключи из Supabase → Settings → API
-const SUPABASE_URL = 'ВСТАВЬТЕ_SUPABASE_URL'
-const SUPABASE_KEY = 'ВСТАВЬТЕ_SUPABASE_ANON_KEY'
-// =========================================
-
+const SUPABASE_URL = 'https://pjrvjlpjyfvlkobzkhtp.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqcnZqbHBqeWZ2bGtvYnpraHRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MjQ2NzksImV4cCI6MjA4OTAwMDY3OX0.hGPjFpMQ7n_xh-XE9qIINFpSPiOrK-zgYn_qY5TPDnY'
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
 const CATS = [
@@ -155,82 +181,191 @@ const CATS = [
   {id:'question',label:'Вопрос',color:'#5A6A8A'}
 ]
 
-let S = {screen:'visits', visits:[], cid:null, tab:'meta', visit:null, tasks:[], obs:[], proto:{}}
+let S = {user:null, screen:'visits', visits:[], cid:null, tab:'meta', visit:null, tasks:[], obs:[], proto:{}}
 
 function e(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function fd(d){if(!d)return'—';try{return new Date(d).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});}catch(x){return d;}}
 function tod(){return new Date().toISOString().split('T')[0];}
+function $(id){return document.getElementById(id)}
 
-function R(){document.getElementById('app').innerHTML = S.screen==='visits' ? rV() : rVis();}
+// ===== AUTH =====
+async function init(){
+  const {data:{session}} = await sb.auth.getSession()
+  if(session){S.user=session.user; await loadVisits()}
+  else showAuth('login')
 
-// ===== VISITS LIST =====
+  sb.auth.onAuthStateChange(async(event,session)=>{
+    if(event==='SIGNED_IN'&&session){S.user=session.user; await loadVisits()}
+    if(event==='SIGNED_OUT'){S.user=null; showAuth('login')}
+  })
+}
+
+function showAuth(mode){
+  const isLogin = mode==='login'
+  $('app').innerHTML = `
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="auth-logo-icon">
+          <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
+            <rect x="1" y="4" width="12" height="4" fill="white" opacity="0.9"/>
+            <rect x="1" y="9" width="5.5" height="4" fill="white" opacity="0.6"/>
+            <rect x="7.5" y="9" width="5.5" height="4" fill="white" opacity="0.6"/>
+          </svg>
+        </div>
+        <div>
+          <div class="auth-logo-text">Brick Buro</div>
+          <div class="auth-logo-sub">Авторский надзор</div>
+        </div>
+      </div>
+      <div class="auth-title">${isLogin?'Вход':'Регистрация'}</div>
+      <div class="auth-sub">${isLogin?'Войдите чтобы продолжить работу':'Создайте аккаунт для вашей команды'}</div>
+      <div class="auth-err" id="auth-err"></div>
+      <div class="auth-field">
+        <div class="auth-label">Email</div>
+        <input class="auth-input" id="auth-email" type="email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <div class="auth-label">Пароль</div>
+        <input class="auth-input" id="auth-pass" type="password" placeholder="Минимум 6 символов" autocomplete="${isLogin?'current-password':'new-password'}"
+          onkeydown="if(event.key==='Enter')${isLogin?'doLogin()':'doRegister()}"}">
+      </div>
+      <button class="auth-btn" id="auth-btn" onclick="${isLogin?'doLogin()':'doRegister()'}">${isLogin?'Войти':'Создать аккаунт'}</button>
+      <div class="auth-switch">
+        ${isLogin?'Нет аккаунта? <a onclick="showAuth(\'register\')">Зарегистрироваться</a>':'Уже есть аккаунт? <a onclick="showAuth(\'login\')">Войти</a>'}
+      </div>
+    </div>
+  </div>`
+}
+
+async function doLogin(){
+  const email=$('auth-email')?.value.trim()
+  const pass=$('auth-pass')?.value
+  if(!email||!pass){showErr('Заполните все поля');return}
+  setAuthLoading(true)
+  const {error} = await sb.auth.signInWithPassword({email,password:pass})
+  if(error){showErr(getErrMsg(error));setAuthLoading(false)}
+}
+
+async function doRegister(){
+  const email=$('auth-email')?.value.trim()
+  const pass=$('auth-pass')?.value
+  if(!email||!pass){showErr('Заполните все поля');return}
+  if(pass.length<6){showErr('Пароль минимум 6 символов');return}
+  setAuthLoading(true)
+  const {error} = await sb.auth.signUp({email,password:pass})
+  if(error){showErr(getErrMsg(error));setAuthLoading(false)}
+  else{showErr('Проверьте почту — мы отправили ссылку для подтверждения.',true);setAuthLoading(false)}
+}
+
+async function doLogout(){
+  await sb.auth.signOut()
+}
+
+function showErr(msg, isInfo=false){
+  const el=$('auth-err')
+  if(!el)return
+  el.textContent=msg
+  el.style.display='block'
+  el.style.background=isInfo?'#E8F5E8':''
+  el.style.color=isInfo?'#2E7D32':''
+  el.style.borderLeftColor=isInfo?'#5A8A6A':''
+}
+
+function setAuthLoading(on){
+  const btn=$('auth-btn')
+  if(btn){btn.disabled=on;btn.textContent=on?'Подождите...':btn.textContent}
+}
+
+function getErrMsg(error){
+  if(error.message.includes('Invalid login'))return'Неверный email или пароль'
+  if(error.message.includes('Email not confirmed'))return'Подтвердите email — проверьте почту'
+  if(error.message.includes('already registered'))return'Этот email уже зарегистрирован'
+  if(error.message.includes('Password should'))return'Пароль минимум 6 символов'
+  return error.message
+}
+
+// ===== VISITS =====
 async function loadVisits(){
-  document.getElementById('app').innerHTML = '<div class="hdr"><div class="hdr-icon"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><rect x="1" y="4" width="12" height="4" fill="white" opacity="0.9"/><rect x="1" y="9" width="5.5" height="4" fill="white" opacity="0.6"/><rect x="7.5" y="9" width="5.5" height="4" fill="white" opacity="0.6"/></svg></div><div class="hdr-word">Brick Buro</div><div class="hdr-right">Авторский надзор</div></div><div class="pg"><div class="loading">Загрузка...</div></div>'
-  const {data, error} = await sb.from('visits').select('*').order('created_at', {ascending:false})
-  if(error){
-    S.visits = []
-    document.getElementById('app').innerHTML = rV() + '<div style="padding:16px;color:#B85C3A;font-size:12px">Ошибка подключения к базе данных. Проверьте ключи Supabase.</div>'
-    return
-  }
-  S.visits = data || []
-  R()
+  $('app').innerHTML = renderHdr() + '<div class="pg"><div class="loading">Загрузка...</div></div>'
+  const {data,error} = await sb.from('visits').select('*')
+    .eq('user_id', S.user.id)
+    .order('created_at',{ascending:false})
+  S.visits = data||[]
+  S.screen='visits'
+  render()
+}
+
+function renderHdr(){
+  const email = S.user?.email||''
+  const short = email.split('@')[0]
+  return `<div class="hdr no-print">
+    <div class="hdr-icon"><svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+      <rect x="1" y="4" width="12" height="4" fill="white" opacity="0.9"/>
+      <rect x="1" y="9" width="5.5" height="4" fill="white" opacity="0.6"/>
+      <rect x="7.5" y="9" width="5.5" height="4" fill="white" opacity="0.6"/>
+    </svg></div>
+    <div class="hdr-word">Brick Buro</div>
+    <div class="hdr-right">
+      <span style="display:none;font-size:10px">${e(short)}</span>
+      <button class="logout-btn" onclick="doLogout()">Выйти</button>
+    </div>
+  </div>`
+}
+
+function render(){
+  $('app').innerHTML = S.screen==='visits' ? rV() : rVis()
 }
 
 function rV(){
   const cards = S.visits.length===0
     ? '<div class="empty">Нажмите «+ Новый визит» чтобы начать</div>'
-    : S.visits.map(v=>`<div class="vcard" onclick="openV('${v.id}')"><div class="vname">${e(v.object_name)||'Без названия'}</div><div class="vmeta">Визит №${v.visit_number} · ${e(v.visit_date)||'—'} · ${e(v.author)||'—'}</div><div class="varr">→</div></div>`).join('')
-  return `<div class="hdr no-print">
-    <div class="hdr-icon"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><rect x="1" y="4" width="12" height="4" fill="white" opacity="0.9"/><rect x="1" y="9" width="5.5" height="4" fill="white" opacity="0.6"/><rect x="7.5" y="9" width="5.5" height="4" fill="white" opacity="0.6"/></svg></div>
-    <div class="hdr-word">Brick Buro</div>
-    <div class="hdr-right">Авторский надзор</div>
-  </div>
-  <div class="pg">
-    <div class="top-row"><div class="h1">Визиты</div><button class="btn-p" onclick="createV()">+ Новый визит</button></div>
+    : S.visits.map(v=>`<div class="vcard" onclick="openV('${v.id}')">
+        <div class="vname">${e(v.object_name)||'Без названия'}</div>
+        <div class="vmeta">Визит №${v.visit_number} · ${e(v.visit_date)||'—'} · ${e(v.author)||'—'}</div>
+        <div class="varr">→</div>
+      </div>`).join('')
+  return renderHdr()+`<div class="pg">
+    <div class="top-row"><div class="h1">Визиты</div>
+    <button class="btn-p" onclick="createV()">+ Новый визит</button></div>
     ${cards}
   </div>`
 }
 
-// ===== VISIT =====
-async function openV(id){
-  S.cid = id
-  S.screen = 'visit'
-  S.tab = 'meta'
-  document.getElementById('app').innerHTML = '<div class="loading" style="padding:40px;text-align:center">Загрузка визита...</div>'
+async function createV(){
+  const {data,error} = await sb.from('visits').insert({
+    user_id: S.user.id,
+    object_name:'', visit_number:S.visits.length+1,
+    visit_date:tod(), author:'', stage:''
+  }).select().single()
+  if(error){alert('Ошибка: '+error.message);return}
+  await openV(data.id)
+}
 
+async function openV(id){
+  S.cid=id; S.screen='visit'; S.tab='meta'
+  $('app').innerHTML = '<div class="loading" style="padding:40px;text-align:center">Загрузка...</div>'
   const [{data:v},{data:tasks},{data:obs},{data:proto}] = await Promise.all([
     sb.from('visits').select('*').eq('id',id).single(),
     sb.from('tasks').select('*').eq('visit_id',id).order('created_at'),
     sb.from('observations').select('*').eq('visit_id',id).order('sort_order'),
     sb.from('protocol').select('*').eq('visit_id',id).maybeSingle()
   ])
-
-  S.visit = v || {}
-  S.tasks = tasks || []
-  S.obs = obs || []
-  S.proto = proto || {attendees:'',discussed:'',agreed:'',next_visit:''}
-  R()
-}
-
-async function createV(){
-  const {data,error} = await sb.from('visits').insert({
-    object_name:'', visit_number: S.visits.length+1,
-    visit_date: tod(), author:'', stage:''
-  }).select().single()
-  if(error){alert('Ошибка создания визита');return}
-  await openV(data.id)
+  S.visit=v||{}; S.tasks=tasks||[]; S.obs=obs||[]
+  S.proto=proto||{attendees:'',discussed:'',agreed:'',next_visit:''}
+  render()
 }
 
 function rVis(){
-  const v = S.visit || {}
-  const TB = [['meta','Объект'],['tasks','Задачи'],['obs','Фото'],['proto','Протокол'],['rep','Отчёт']]
-  const th = TB.map(([k,l])=>`<button class="tab ${S.tab===k?'on':''}" onclick="sT('${k}')">${l}</button>`).join('')
-  let b = ''
-  if(S.tab==='meta') b=tMeta(v)
-  else if(S.tab==='tasks') b=tTask()
-  else if(S.tab==='obs') b=tObs()
-  else if(S.tab==='proto') b=tProto()
-  else if(S.tab==='rep') b=tRep(v)
+  const v=S.visit||{}
+  const TB=[['meta','Объект'],['tasks','Задачи'],['obs','Фото'],['proto','Протокол'],['rep','Отчёт']]
+  const th=TB.map(([k,l])=>`<button class="tab ${S.tab===k?'on':''}" onclick="sT('${k}')">${l}</button>`).join('')
+  let b=''
+  if(S.tab==='meta')b=tMeta(v)
+  else if(S.tab==='tasks')b=tTask()
+  else if(S.tab==='obs')b=tObs()
+  else if(S.tab==='proto')b=tProto()
+  else if(S.tab==='rep')b=tRep(v)
   return `<div class="vhdr no-print">
     <button class="backb" onclick="bk()">← Визиты</button>
     <div class="vtitle">${e(v.object_name)||'Новый визит'}</div>
@@ -242,8 +377,7 @@ function rVis(){
   </div>`
 }
 
-function tMeta(v){
-  return `
+function tMeta(v){return `
   <div class="fld"><div class="lbl">Название объекта</div>
     <input class="inp" id="f-obj" value="${e(v.object_name)}" placeholder="Введите название объекта"></div>
   <div class="r2">
@@ -259,85 +393,48 @@ function tMeta(v){
 }
 
 async function saveV(){
-  const btn = document.getElementById('sb')
-  if(btn) btn.textContent = 'Сохраняю...'
-
-  const obj = document.getElementById('f-obj')?.value || ''
-  const num = +document.getElementById('f-num')?.value || 1
-  const date = document.getElementById('f-date')?.value || ''
-  const auth = document.getElementById('f-auth')?.value || ''
-  const stage = document.getElementById('f-stage')?.value || ''
-
-  const {error} = await sb.from('visits').update({
-    object_name:obj, visit_number:num, visit_date:date, author:auth, stage:stage
-  }).eq('id', S.cid)
-
-  // Save protocol
-  const att = document.getElementById('f-att')?.value
-  const disc = document.getElementById('f-disc')?.value
-  const agr = document.getElementById('f-agr')?.value
-  const nxt = document.getElementById('f-nxt')?.value
-  if(att !== undefined){
-    await sb.from('protocol').upsert({
-      visit_id:S.cid, attendees:att, discussed:disc, agreed:agr, next_visit:nxt
-    },{onConflict:'visit_id'})
+  const btn=$('sb'); if(btn)btn.textContent='Сохраняю...'
+  const obj=$('f-obj')?.value||'', num=+$('f-num')?.value||1
+  const date=$('f-date')?.value||'', auth=$('f-auth')?.value||'', stage=$('f-stage')?.value||''
+  await sb.from('visits').update({object_name:obj,visit_number:num,visit_date:date,author:auth,stage}).eq('id',S.cid)
+  const att=$('f-att')?.value, disc=$('f-disc')?.value, agr=$('f-agr')?.value, nxt=$('f-nxt')?.value
+  if(att!==undefined){
+    await sb.from('protocol').upsert({visit_id:S.cid,attendees:att,discussed:disc,agreed:agr,next_visit:nxt},{onConflict:'visit_id'})
+    S.proto={attendees:att,discussed:disc,agreed:agr,next_visit:nxt}
   }
-
-  S.visit = {...S.visit, object_name:obj, visit_number:num, visit_date:date, author:auth, stage:stage}
-  if(btn){btn.textContent='Сохранено!'; setTimeout(()=>btn.textContent='Сохранить',1500)}
+  S.visit={...S.visit,object_name:obj,visit_number:num,visit_date:date,author:auth,stage}
+  if(btn){btn.textContent='Сохранено!';setTimeout(()=>btn.textContent='Сохранить',1500)}
 }
 
-async function bk(){
-  S.screen = 'visits'
-  S.cid = null
-  await loadVisits()
-}
+async function bk(){S.screen='visits'; await loadVisits();}
+function sT(t){S.tab=t;render();}
 
-function sT(t){S.tab=t; R();}
-
-// ===== TASKS =====
 function tTask(){
-  const dn = S.tasks.filter(t=>t.done).length
-  const op = S.tasks.filter(t=>!t.done).length
-  const rows = S.tasks.map((t,i)=>`
+  const dn=S.tasks.filter(t=>t.done).length, op=S.tasks.filter(t=>!t.done).length
+  const rows=S.tasks.map((t,i)=>`
     <div class="trow ${t.done?'dn':''}">
       <div class="chk ${t.done?'on':''}" onclick="togT('${t.id}',${i})"></div>
       <span class="ttxt">${e(t.text)}</span>
       <button class="db" onclick="delT('${t.id}',${i})">×</button>
     </div>`).join('')
   return `<div class="cnts"><span>Выполнено: <b>${dn}</b></span><span>Открыто: <b>${op}</b></span></div>
-    <div class="arow">
-      <input class="ainp" id="nt" placeholder="Добавить задачу..." onkeydown="if(event.key==='Enter')aT()">
-      <button class="abtn" onclick="aT()">+</button>
-    </div>${rows}`
+    <div class="arow"><input class="ainp" id="nt" placeholder="Добавить задачу..." onkeydown="if(event.key==='Enter')aT()">
+    <button class="abtn" onclick="aT()">+</button></div>${rows}`
 }
 
 async function aT(){
-  const inp = document.getElementById('nt')
-  if(!inp||!inp.value.trim()) return
-  const {data,error} = await sb.from('tasks').insert({visit_id:S.cid, text:inp.value.trim(), done:false}).select().single()
-  if(!error){S.tasks.push(data); inp.value=''; R(); setTimeout(()=>{const el=document.getElementById('nt');if(el)el.focus()},30)}
+  const i=$('nt'); if(!i||!i.value.trim())return
+  const {data,error}=await sb.from('tasks').insert({visit_id:S.cid,text:i.value.trim(),done:false}).select().single()
+  if(!error){S.tasks.push(data);i.value='';render();setTimeout(()=>{const el=$('nt');if(el)el.focus()},30)}
 }
+async function togT(id,i){const done=!S.tasks[i].done;await sb.from('tasks').update({done}).eq('id',id);S.tasks[i].done=done;render();}
+async function delT(id,i){await sb.from('tasks').delete().eq('id',id);S.tasks.splice(i,1);render();}
 
-async function togT(id,i){
-  const done = !S.tasks[i].done
-  await sb.from('tasks').update({done}).eq('id',id)
-  S.tasks[i].done = done; R()
-}
-
-async function delT(id,i){
-  await sb.from('tasks').delete().eq('id',id)
-  S.tasks.splice(i,1); R()
-}
-
-// ===== OBSERVATIONS =====
 function tObs(){
-  const cards = S.obs.map((o,i)=>`
+  const cards=S.obs.map((o,i)=>`
     <div class="ocard">
-      <div class="oph" onclick="trP(${i})">
-        ${o.photo_url?`<img src="${o.photo_url}">`:'<span>нажмите —<br>добавить фото</span>'}
-        <span class="oplbl">фото ${i+1}</span>
-      </div>
+      <div class="oph" onclick="trP(${i})">${o.photo_url?`<img src="${o.photo_url}">`:'<span>нажмите —<br>добавить фото</span>'}
+        <span class="oplbl">фото ${i+1}</span></div>
       <div class="ocats">${CATS.map(c=>`<button class="cat" style="${o.category===c.id?`background:${c.color};color:white`:''}" onclick="sCat('${o.id}',${i},'${c.id}')">${c.label}</button>`).join('')}</div>
       <textarea class="onote" rows="2" placeholder="Описание..." oninput="sNote('${o.id}',${i},this.value)">${e(o.note)}</textarea>
       <button class="odel" onclick="delO('${o.id}',${i})">удалить</button>
@@ -347,69 +444,29 @@ function tObs(){
     <div class="ogrid">${cards}</div>`
 }
 
-let pendingObsIdx = null
-
+let pi=null
 async function aO(){
-  const {data,error} = await sb.from('observations').insert({
-    visit_id:S.cid, category:'defect', note:'', sort_order:S.obs.length
-  }).select().single()
-  if(!error){S.obs.push(data); R()}
+  const {data,error}=await sb.from('observations').insert({visit_id:S.cid,category:'defect',note:'',sort_order:S.obs.length}).select().single()
+  if(!error){S.obs.push(data);render()}
 }
-
-function trP(i){pendingObsIdx=i; document.getElementById('phi').click();}
-
+function trP(i){pi=i;$('phi').click();}
 async function hPhoto(ev){
-  const file = ev.target.files[0]
-  if(!file||pendingObsIdx===null) return
-  const obs = S.obs[pendingObsIdx]
-
-  // Upload to Supabase Storage
-  const path = `visits/${S.cid}/${Date.now()}.jpg`
-  const {error:upErr} = await sb.storage.from('site-photos').upload(path, file, {contentType:'image/jpeg'})
-
-  let photoUrl = null
-  if(!upErr){
-    const {data:{publicUrl}} = sb.storage.from('site-photos').getPublicUrl(path)
-    photoUrl = publicUrl
-  } else {
-    // Fallback: store as base64
-    const reader = new FileReader()
-    reader.onload = async (e2) => {
-      photoUrl = e2.target.result
-      await sb.from('observations').update({photo_url:photoUrl}).eq('id',obs.id)
-      S.obs[pendingObsIdx].photo_url = photoUrl
-      R()
-    }
-    reader.readAsDataURL(file)
-    ev.target.value = ''
-    return
-  }
-
-  await sb.from('observations').update({photo_url:photoUrl}).eq('id',obs.id)
-  S.obs[pendingObsIdx].photo_url = photoUrl
-  ev.target.value = ''
-  R()
+  const f=ev.target.files[0]; if(!f||pi===null)return
+  const o=S.obs[pi]
+  const path=`${S.user.id}/${S.cid}/${Date.now()}.jpg`
+  const {error:upErr}=await sb.storage.from('site-photos').upload(path,f,{contentType:'image/jpeg'})
+  let url=null
+  if(!upErr){const {data:{publicUrl}}=sb.storage.from('site-photos').getPublicUrl(path);url=publicUrl}
+  else{const r=new FileReader();r.onload=async e2=>{url=e2.target.result;await sb.from('observations').update({photo_url:url}).eq('id',o.id);S.obs[pi].photo_url=url;render();};r.readAsDataURL(f);ev.target.value='';return}
+  await sb.from('observations').update({photo_url:url}).eq('id',o.id)
+  S.obs[pi].photo_url=url; ev.target.value=''; render()
 }
+async function sCat(id,i,cat){await sb.from('observations').update({category:cat}).eq('id',id);S.obs[i].category=cat;render();}
+async function sNote(id,i,val){S.obs[i].note=val;clearTimeout(window._nt);window._nt=setTimeout(()=>sb.from('observations').update({note:val}).eq('id',id),800);}
+async function delO(id,i){await sb.from('observations').delete().eq('id',id);S.obs.splice(i,1);render();}
 
-async function sCat(id,i,cat){
-  await sb.from('observations').update({category:cat}).eq('id',id)
-  S.obs[i].category=cat; R()
-}
-
-async function sNote(id,i,val){
-  S.obs[i].note=val
-  clearTimeout(window._noteTimer)
-  window._noteTimer = setTimeout(()=>sb.from('observations').update({note:val}).eq('id',id),800)
-}
-
-async function delO(id,i){
-  await sb.from('observations').delete().eq('id',id)
-  S.obs.splice(i,1); R()
-}
-
-// ===== PROTOCOL =====
 function tProto(){
-  const p = S.proto || {}
+  const p=S.proto||{}
   return `
   <div class="fld"><div class="lbl">Участники совещания</div>
     <input class="inp" id="f-att" value="${e(p.attendees)}" placeholder="Иванова А.С. (архитектор), Петров В.И. (прораб)..."></div>
@@ -422,52 +479,27 @@ function tProto(){
   <button class="bbtn" onclick="saveV()">Сохранить протокол</button>`
 }
 
-// ===== REPORT =====
 function tRep(v){
-  const dn = S.tasks.filter(t=>t.done)
-  const op = S.tasks.filter(t=>!t.done)
+  const dn=S.tasks.filter(t=>t.done),op=S.tasks.filter(t=>!t.done)
   const cC={defect:'#B85C3A',ok:'#5A8A6A',note:'#8A7A5A',question:'#5A6A8A'}
   const cL={defect:'Дефект',ok:'Принято',note:'Заметка',question:'Вопрос'}
-  const yr=new Date().getFullYear(), nm=String(v.visit_number||1).padStart(3,'0')
-  const p = S.proto || {}
-
-  const tr=[
-    ...dn.map(t=>`<div class="pdf-task"><div class="pdf-task-chk done"></div><span class="pdf-task-text done">${e(t.text)}</span><span class="pdf-badge pdf-badge-done">Выполнено</span></div>`),
-    ...op.map(t=>`<div class="pdf-task"><div class="pdf-task-chk open"></div><span class="pdf-task-text">${e(t.text)}</span><span class="pdf-badge pdf-badge-next">Визит №${(v.visit_number||0)+1}</span></div>`)
-  ].join('')
-
-  const oc=S.obs.map(o=>`
-    <div class="pdf-obs-card">
-      ${o.photo_url?`<img class="pdf-obs-photo" src="${o.photo_url}">`:'<div class="pdf-obs-photo-empty">нет фото</div>'}
-      <div class="pdf-obs-info">
-        <div class="pdf-obs-cat" style="color:${cC[o.category]||'#888'}">${cL[o.category]||o.category}</div>
-        <div class="pdf-obs-note">${e(o.note)||'—'}</div>
-      </div>
-    </div>`).join('')
-
+  const yr=new Date().getFullYear(),nm=String(v.visit_number||1).padStart(3,'0')
+  const p=S.proto||{}
+  const tr=[...dn.map(t=>`<div class="pdf-task"><div class="pdf-task-chk done"></div><span class="pdf-task-text done">${e(t.text)}</span><span class="pdf-badge pdf-badge-done">Выполнено</span></div>`),...op.map(t=>`<div class="pdf-task"><div class="pdf-task-chk open"></div><span class="pdf-task-text">${e(t.text)}</span><span class="pdf-badge pdf-badge-next">Визит №${(v.visit_number||0)+1}</span></div>`)].join('')
+  const oc=S.obs.map(o=>`<div class="pdf-obs-card">${o.photo_url?`<img class="pdf-obs-photo" src="${o.photo_url}">`:'<div class="pdf-obs-photo-empty">нет фото</div>'}<div class="pdf-obs-info"><div class="pdf-obs-cat" style="color:${cC[o.category]||'#888'}">${cL[o.category]||o.category}</div><div class="pdf-obs-note">${e(o.note)||'—'}</div></div></div>`).join('')
   return `
   <div class="sgrid no-print">
     <div class="sc"><div class="sl">Выполнено</div><div class="sv">${dn.length}</div></div>
     <div class="sc"><div class="sl">Открыто</div><div class="sv">${op.length}</div></div>
     <div class="sc"><div class="sl">Замечаний</div><div class="sv">${S.obs.length}</div></div>
   </div>
-  <div class="hint no-print">Нажмите «Скачать PDF» → в диалоге выберите «Сохранить как PDF» → включите «Фоновая графика».</div>
+  <div class="hint no-print">Нажмите «Скачать PDF» → выберите «Сохранить как PDF» → включите «Фоновая графика».</div>
   <button class="bbtn no-print" onclick="printPdf()">Скачать PDF</button>
-
   <div class="pdf-page">
     <div class="pdf-hdr">
       <div class="pdf-hdr-top">
-        <div>
-          <div class="pdf-logo-mark">
-            <div class="pdf-logo-sq"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><rect x="1" y="4" width="12" height="4" fill="white" opacity="0.9"/><rect x="1" y="9" width="5.5" height="4" fill="white" opacity="0.6"/><rect x="7.5" y="9" width="5.5" height="4" fill="white" opacity="0.6"/></svg></div>
-            <div class="pdf-logo-name">Brick Buro</div>
-          </div>
-          <div class="pdf-logo-tag">дизайн коммерческих интерьеров · Санкт-Петербург</div>
-        </div>
-        <div>
-          <div class="pdf-doc-type">Журнал авт. сопровождения</div>
-          <div class="pdf-doc-num">№ АС-${yr}-${nm}</div>
-        </div>
+        <div><div class="pdf-logo-mark"><div class="pdf-logo-sq"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><rect x="1" y="4" width="12" height="4" fill="white" opacity="0.9"/><rect x="1" y="9" width="5.5" height="4" fill="white" opacity="0.6"/><rect x="7.5" y="9" width="5.5" height="4" fill="white" opacity="0.6"/></svg></div><div class="pdf-logo-name">Brick Buro</div></div><div class="pdf-logo-tag">дизайн коммерческих интерьеров · Санкт-Петербург</div></div>
+        <div><div class="pdf-doc-type">Журнал авт. сопровождения</div><div class="pdf-doc-num">№ АС-${yr}-${nm}</div></div>
       </div>
       <div class="pdf-visit-title">${e(v.object_name)||'Объект'} — Визит № ${v.visit_number||1}</div>
       <div class="pdf-meta">
@@ -479,12 +511,7 @@ function tRep(v){
     <div class="pdf-body">
       ${S.tasks.length?`<div class="pdf-section"><div class="pdf-sec-head"><div class="pdf-sec-num">01</div><div class="pdf-sec-title">Выполнение плановых задач</div><div class="pdf-sec-line"></div></div>${tr}</div>`:''}
       ${S.obs.length?`<div class="pdf-section"><div class="pdf-sec-head"><div class="pdf-sec-num">02</div><div class="pdf-sec-title">Замечания и фиксация на объекте</div><div class="pdf-sec-line"></div></div><div class="pdf-obs-grid">${oc}</div></div>`:''}
-      ${p.discussed||p.agreed?`<div class="pdf-section"><div class="pdf-sec-head"><div class="pdf-sec-num">03</div><div class="pdf-sec-title">Протокол совещания на объекте</div><div class="pdf-sec-line"></div></div>
-        ${p.attendees?`<div class="pdf-proto-item"><div class="pdf-proto-lbl">Участники</div><div class="pdf-proto-text">${e(p.attendees)}</div></div>`:''}
-        ${p.discussed?`<div class="pdf-proto-item"><div class="pdf-proto-lbl">Обсудили</div><div class="pdf-proto-text">${e(p.discussed)}</div></div>`:''}
-        ${p.agreed?`<div class="pdf-proto-item"><div class="pdf-proto-lbl">Договорились</div><div class="pdf-proto-text">${e(p.agreed)}</div></div>`:''}
-        ${p.next_visit?`<div class="pdf-proto-item"><div class="pdf-proto-lbl">На следующий визит</div><div class="pdf-proto-text">${e(p.next_visit)}</div></div>`:''}
-      </div>`:''}
+      ${p.discussed||p.agr?`<div class="pdf-section"><div class="pdf-sec-head"><div class="pdf-sec-num">03</div><div class="pdf-sec-title">Протокол совещания на объекте</div><div class="pdf-sec-line"></div></div>${p.attendees?`<div class="pdf-proto-item"><div class="pdf-proto-lbl">Участники</div><div class="pdf-proto-text">${e(p.attendees)}</div></div>`:''}${p.discussed?`<div class="pdf-proto-item"><div class="pdf-proto-lbl">Обсудили</div><div class="pdf-proto-text">${e(p.discussed)}</div></div>`:''}${p.agreed?`<div class="pdf-proto-item"><div class="pdf-proto-lbl">Договорились</div><div class="pdf-proto-text">${e(p.agreed)}</div></div>`:''}${p.next_visit?`<div class="pdf-proto-item"><div class="pdf-proto-lbl">На следующий визит</div><div class="pdf-proto-text">${e(p.next_visit)}</div></div>`:''}</div>`:''}
       <div class="pdf-sign-row">
         <div><div class="pdf-sign-line"></div><div class="pdf-sign-name">${e(v.author)||'________________'}</div><div class="pdf-sign-role">Архитектор / авт. надзор</div></div>
         <div><div class="pdf-sign-line"></div><div class="pdf-sign-name">________________</div><div class="pdf-sign-role">Прораб</div></div>
@@ -500,13 +527,12 @@ function tRep(v){
 }
 
 function printPdf(){
-  const v = S.visit || {}
-  document.title = 'BrickBuro_АС_'+(v.object_name||'vizit')+'_визит'+(v.visit_number||1)
+  const v=S.visit||{}
+  document.title='BrickBuro_АС_'+(v.object_name||'vizit')+'_визит'+(v.visit_number||1)
   window.print()
 }
 
-// Start
-loadVisits()
+init()
 </script>
 </body>
 </html>
